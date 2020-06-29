@@ -29,7 +29,7 @@ const sendMessage = (e) => {
   if(messageContent.length) {
     addMessage(userName, messageContent);
     socket.emit('message', {author: userName, content: messageContent});
-    messageContent = '';
+    messageContentInput.value = '';
   } else {
     window.alert('Add message to send');
   }
