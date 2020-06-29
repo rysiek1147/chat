@@ -10,13 +10,29 @@ const messages = [];
 const users = [];
 
 io.on('connection', (socket) => {
-  console.log('New client! its id - ' + socket.id);
+  socket.on('login', (user) => {
+    users.push({name: user, id: socket.id});
+    socket.broadcast.emit('message', {
+      author: 'Chat Bot',
+      content: user + ' has joined the conversation'
+    });
+  });
+
   socket.on('message', (message) => {
     messages.push(message);
     socket.broadcast.emit('message', message);
   });
-  socket.on('disconnect', () => { console.log('socket ' + socket.id + ' has left')});
-  console.log('add message listener');
+
+  socket.on('disconnect', () => {
+    if(users.some( user => user.id === socket.id)) {
+      const user = users.filter( user => user.id === socket.id);
+      socket.broadcast.emit('message', {
+        author: 'Chat Bot',
+        content: user[0].name + ' has left the conversation'
+      });
+      users.splice(users.indexOf(user[0]), 1);
+    }
+  });
 })
 
 app.use(express.static(path.join(__dirname, '/client')));
